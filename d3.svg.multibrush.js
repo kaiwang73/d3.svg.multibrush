@@ -82,7 +82,8 @@
         yClamp = true, // whether to clamp the y-extent to the range
         resizes = d3_svg_brushResizes[0],
         resizeAdaption = function () {}, // Function to 'call' on new resize selection
-        extentAdaption = function () {}; // Function to 'call' on new extent selection
+        extentAdaption = function () {}, // Function to 'call' on new extent selection
+        currentPosition;//current position of brush element
 
     event.of = function(thiz, argumentz) {
       return function(e1) {
@@ -298,6 +299,8 @@
         if (d3.event.altKey) center = origin.slice();
       }
 
+      currentPosition=i;
+
       // Propagate the active cursor to the body for the drag duration.
       g.style("pointer-events", "none");
       d3.select("body").style("cursor", eventTarget.style("cursor"));
@@ -486,7 +489,7 @@
       // Invert the pixel extent to data-space.
       if (!arguments.length) {
         if (x) {
-          if (xExtentDomain[0]) {
+          if (xExtentDomain.indexOf(null)==-1) {
             xOutput = xExtentDomain;
           } else {
             xOutput = xExtent.map(function (d) {
@@ -499,7 +502,7 @@
           }
         }
         if (y) {
-          if (yExtentDomain[0]) {
+          if (yExtentDomain.indexOf(null)==-1) {
             yOutput = yExtentDomain;
           } else {
             yOutput = yExtent.map(function (d) {
@@ -534,6 +537,7 @@
           return d;
         });
         xExtent = xOutput;
+        xExtent.push([0,0]);
         if(!y) yExtent = xOutput.map(function() { return [0,0]; });
       }
       if (y) {
@@ -550,6 +554,7 @@
           return d;
         });
         yExtent = yOutput;
+        yExtent.push([0,0]);
         if(!x) xExtent = yOutput.map(function () { return [0,0]; });
       }
 
@@ -559,6 +564,11 @@
 
       return brush;
     };
+
+    //Return the current brush element;
+    brush.current = function(){
+    	return currentPosition;
+    }
 
     brush.clear = function() {
       xExtent = [[0, 0]], yExtent = [[0, 0]];
